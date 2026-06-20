@@ -2,7 +2,7 @@
 
 Selamat datang! Ini adalah **starter project** untuk sesi *live coding* posisi **Programmer PHP/Laravel** di PT Elimspro Tekno Medika.
 
-Aplikasi ini adalah sistem informasi klinik sederhana yang sudah berjalan sebagian. Bacalah README ini secara menyeluruh sebelum mulai mengerjakan.
+Bacalah README ini secara menyeluruh sebelum mulai mengerjakan.
 
 ---
 
@@ -62,153 +62,76 @@ Buka **http://localhost:8000** — kamu akan melihat daftar 20 pasien.
 
 ---
 
-## Tugas
+## Aturan Sesi
 
-Kerjakan semua tugas di branch `kandidat`. Commit secara **bertahap** (minimal 4 commit terpisah — bukan satu commit besar di akhir).
-
----
-
-### Tugas 1 — Debugging
-
-Ada **satu bug** pada modul Pasien yang sudah ada. Temukan dan perbaiki.
-
-**Cara menemukan:** coba edit data pasien tanpa mengubah No. Rekam Medis, lalu simpan. Perhatikan apa yang terjadi.
-
-Perbaiki bug tersebut dan pastikan edit pasien berjalan normal.
+- **Durasi: 90–120 menit**, dikerjakan di kantor dengan pengawasan, memakai laptop sendiri.
+- Kerjakan **mandiri**. **AI assistant (Copilot / Cursor / Codeium / ChatGPT) WAJIB dimatikan.** Boleh membuka dokumentasi resmi Laravel/PHP.
+- Untuk fitur interaktif, **pilih salah satu: Livewire ATAU Vue** (kuasai keduanya = nilai bonus).
+- **Commit bertahap** tiap menyelesaikan satu bagian (bukan satu commit besar di akhir) — proses kerjamu ikut dinilai.
 
 ---
 
-### Tugas 2 — Modul Kunjungan (Migration + Model + Relasi)
+## Tugas yang Harus Dikerjakan
 
-Buat tabel `kunjungan` dengan kolom:
+### 1. Perbaiki Bug pada Modul Pasien
 
-| Kolom | Tipe | Keterangan |
-|---|---|---|
-| `id` | bigint, PK | |
-| `pasien_id` | bigint, FK | → tabel `pasien` |
-| `dokter_id` | bigint, FK | → tabel `dokter` |
-| `tgl_kunjungan` | date | |
-| `keluhan` | text | nullable |
-| `catatan_dokter` | text | nullable |
-| timestamps | | |
+Ada laporan: **saat mengedit data pasien dan menyimpannya, muncul error validasi "no_rm sudah digunakan" — padahal no_rm tidak diubah.** Akibatnya data pasien yang sudah ada tidak bisa diperbarui. Temukan penyebabnya dan perbaiki. Jelaskan singkat penyebabnya pada deskripsi commit.
 
-Buat juga:
-- Model `Kunjungan` dengan `$fillable` dan relasi `belongsTo` ke `Pasien` dan `Dokter`
-- Relasi `hasMany('kunjungan')` di model `Pasien`
+### 2. Buat Modul "Kunjungan" (terhubung ke Pasien)
 
----
+Tambahkan modul **Kunjungan** dengan ketentuan:
 
-### Tugas 3 — CRUD Kunjungan
+- **Migration** tabel `kunjungan` dengan kolom: `pasien_id` (FK), `dokter_id` (FK), `tanggal` (date), `keluhan` (text), `diagnosis` (string), `biaya` (decimal), `status` (string).
+- **Relasi Eloquent**: satu Pasien punya banyak Kunjungan; Kunjungan milik satu Pasien dan satu Dokter.
+- **CRUD lengkap**: daftar (paginasi 10), tambah, edit, hapus.
+- **Validasi server-side** untuk input (field wajib, format tanggal, biaya numerik).
+- Pada halaman daftar, tampilkan **nama pasien & nama dokter** untuk tiap kunjungan **secara efisien** (perhatikan jumlah query database).
 
-Buat halaman dan controller untuk Kunjungan:
+### 3. Buat REST API
 
-- **Index** — daftar kunjungan (tampilkan: tanggal, nama pasien, nama dokter, keluhan singkat). **Wajib gunakan eager loading** agar tidak terjadi query N+1.
-- **Create + Store** — form tambah kunjungan baru dengan validasi:
-  - `pasien_id` → required, harus ada di tabel pasien
-  - `dokter_id` → required, harus ada di tabel dokter
-  - `tgl_kunjungan` → required, format tanggal valid
-  - `keluhan` → nullable
-- **Tampilkan pesan sukses/gagal** setelah aksi
+Sediakan endpoint: **`GET /api/pasien/{id}/kunjungan`** yang mengembalikan daftar kunjungan milik pasien tersebut dalam format **JSON**. Pastikan status code tepat (mis. 404 bila pasien tidak ditemukan).
 
-Route yang diharapkan:
-```
-GET  /kunjungan          → index
-GET  /kunjungan/create   → form tambah
-POST /kunjungan          → simpan
-```
+### 4. Fitur Interaktif (Livewire atau Vue)
 
----
+Buat satu fitur interaktif tanpa reload halaman penuh, pilih salah satu:
 
-### Tugas 4 — REST API
+- **Pencarian pasien real-time** (ketik nama/no_rm → daftar tersaring), atau
+- **Ubah status kunjungan secara inline** dari halaman daftar.
 
-Buat endpoint di `routes/api.php`:
+### 5. Query SQL
 
-```
-GET /api/pasien/{id}/kunjungan
-```
+Tuliskan **2 query SQL** (boleh via Tinker / DBeaver / phpMyAdmin), simpan di file `JAWABAN_SQL.sql` di root project:
 
-**Response sukses (200):**
-```json
-{
-  "data": {
-    "pasien": {
-      "id": 1,
-      "no_rm": "RM0001",
-      "nama": "Agus Setiawan"
-    },
-    "kunjungan": [
-      {
-        "id": 1,
-        "tgl_kunjungan": "2024-06-15",
-        "keluhan": "Demam dan batuk",
-        "dokter": "dr. Budi Santoso"
-      }
-    ],
-    "total": 1
-  }
-}
-```
+1. Total biaya kunjungan **per pasien**, hanya menampilkan pasien dengan total biaya **lebih dari 1.000.000**.
+2. **5 diagnosis terbanyak** pada bulan ini, beserta jumlahnya.
 
-**Response pasien tidak ditemukan (404):**
-```json
-{
-  "message": "Pasien tidak ditemukan."
-}
-```
+### 6. Bonus (bila waktu cukup)
+
+Pencarian/filter kunjungan, unit test sederhana, dokumentasi API singkat, atau menampilkan Livewire **dan** Vue sekaligus.
 
 ---
 
-### Tugas 5 — Fitur Interaktif dengan Livewire
+## Cara Pengumpulan
 
-Livewire sudah terpasang di project ini.
-
-Buat **satu** fitur interaktif menggunakan Livewire, pilih salah satu:
-
-- **Opsi A:** Search/filter pasien secara real-time di halaman index pasien (tanpa reload halaman)
-- **Opsi B:** Tabel kunjungan yang bisa difilter berdasarkan nama dokter atau rentang tanggal
-
-Komponen harus menampilkan data dengan **paginasi** (jangan load semua data sekaligus).
+1. **Fork / clone** repo ini ke akun GitHub-mu sendiri (jadikan **public**), atau buat repo baru milikmu.
+2. Kerjakan di branch **`kandidat`**: `git checkout -b kandidat`.
+3. **Commit bertahap & bermakna** tiap menyelesaikan tugas.
+4. Selesai → `git push`, lalu **bagikan URL repo** kamu ke penguji.
+   *(Bila diminta cara offline: jalankan `git bundle create miniklinik-NAMA.bundle --all` dan serahkan filenya.)*
 
 ---
 
-### Tugas 6 — Query SQL
+## Yang Dinilai
 
-Tuliskan **2 query SQL mentah** (boleh di file `queries.sql`, di `README`, atau dijalankan via `php artisan tinker` dengan `DB::select()`).
-
-**Query 1:** Tampilkan daftar pasien beserta jumlah kunjungannya, hanya pasien yang memiliki **lebih dari 1 kunjungan**, diurutkan dari yang terbanyak.
-
-**Query 2:** Tampilkan nama dokter dan jumlah kunjungan yang ditanganinya **pada bulan berjalan**, diurutkan dari terbanyak.
-
----
-
-## Ketentuan Pengumpulan
-
-1. Pastikan semua pekerjaan ada di branch **`kandidat`**
-2. Simpan screenshot bukti pengerjaan di folder **`screenshots/`** (lihat daftar di bawah)
-3. Push ke fork GitHub-mu
-4. Kirimkan **URL repo GitHub-mu** kepada penguji sebelum waktu habis
-5. Pastikan repo **Public** agar penguji bisa mengakses
-
-```bash
-git push origin kandidat
-```
-
-### Screenshot Wajib (taruh di folder `screenshots/`)
-
-Buat folder `screenshots/` di root project, lalu simpan file-file berikut:
-
-| Nama File | Isi Screenshot |
+| Aspek | Bobot |
 |---|---|
-| `01-pasien-edit-ok.png` | Halaman edit pasien berhasil disimpan (bug sudah diperbaiki) |
-| `02-kunjungan-index.png` | Halaman daftar kunjungan dengan minimal 3 data |
-| `03-kunjungan-create.png` | Form tambah kunjungan (kosong atau terisi) |
-| `04-api-200.png` | Response `GET /api/pasien/{id}/kunjungan` di Postman / browser (status 200, body JSON) |
-| `05-api-404.png` | Response dengan id pasien yang tidak ada (status 404) |
-| `06-livewire.png` | Fitur Livewire berjalan — tampilkan hasil search/filter |
-| `07-sql-query1.png` | Hasil query SQL No. 1 (bisa dari MySQL Workbench, DBeaver, atau `tinker`) |
-| `08-sql-query2.png` | Hasil query SQL No. 2 |
-
-> Screenshot tidak harus sempurna — yang penting menunjukkan fitur berjalan. Format PNG atau JPG, nama file bebas asalkan mudah diidentifikasi.
+| Memahami & memperbaiki bug (Tugas 1) | 15 |
+| Membaca/menavigasi kode existing & keaslian kerja | 35 |
+| Modul Kunjungan: migration, relasi, CRUD, validasi, efisiensi query (Tugas 2) | 20 |
+| REST API (Tugas 3) | 10 |
+| Fitur interaktif (Tugas 4) | 10 |
+| Query SQL (Tugas 5) | 5 |
+| Kualitas commit Git & kode | 5 |
 
 ---
 
