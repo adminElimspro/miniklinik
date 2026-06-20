@@ -2,7 +2,7 @@
 
 Selamat datang! Ini adalah **starter project** untuk sesi *live coding* posisi **Programmer PHP/Laravel** di PT Elimspro Tekno Medika.
 
-Aplikasi ini adalah sistem informasi klinik sederhana yang sudah berjalan sebagian. Tugasmu adalah mengembangkan dan memperbaikinya selama sesi tes. Penguji akan menjelaskan rincian tugas saat sesi dimulai.
+Aplikasi ini adalah sistem informasi klinik sederhana yang sudah berjalan sebagian. Bacalah README ini secara menyeluruh sebelum mulai mengerjakan.
 
 ---
 
@@ -13,59 +13,42 @@ Aplikasi ini adalah sistem informasi klinik sederhana yang sudah berjalan sebagi
 | PHP | 8.2 |
 | Composer | 2.x |
 | MySQL | 8.x (atau PostgreSQL 15+) |
-| Laravel CLI | — (sudah termasuk dalam `vendor`) |
 
 ---
 
 ## Cara Menjalankan
 
 ```bash
-# 1. Clone repo (tiap kandidat memakai salinan/fork sendiri)
-git clone <url-repo-kamu>
+# 1. Fork repo ini ke akun GitHub-mu, lalu clone fork tersebut
+git clone https://github.com/<username-kamu>/miniklinik.git
 cd miniklinik
 
-# 2. Install dependensi PHP
+# 2. Buat branch kerja
+git checkout -b kandidat
+
+# 3. Install dependensi
 composer install
 
-# 3. Salin file konfigurasi
+# 4. Salin konfigurasi
 cp .env.example .env
-
-# 4. Generate application key
 php artisan key:generate
 
-# 5. Buat database MySQL (gunakan tool seperti phpMyAdmin / DBeaver / CLI)
-#    Buat database baru bernama: miniklinik
-
-# 6. Isi konfigurasi database di file .env
+# 5. Buat database MySQL bernama: miniklinik
+#    Lalu isi .env:
 #    DB_DATABASE=miniklinik
 #    DB_USERNAME=root
 #    DB_PASSWORD=<password-mysql-kamu>
 
-# 7. Jalankan migrasi & seeder
+# 6. Migrasi & seed
 php artisan migrate --seed
 
-# 8. Jalankan server lokal
+# 7. Jalankan server
 php artisan serve
 ```
 
-Setelah langkah 8, buka browser dan akses: **http://localhost:8000**
+Buka **http://localhost:8000** — kamu akan melihat daftar 20 pasien.
 
-Kamu akan melihat daftar 20 data pasien yang sudah ter-seed.
-
----
-
-## Menggunakan PostgreSQL
-
-Jika ingin menggunakan PostgreSQL, ubah bagian ini di `.env`:
-
-```env
-DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_DATABASE=miniklinik
-DB_USERNAME=postgres
-DB_PASSWORD=<password-postgres-kamu>
-```
+> **PostgreSQL?** Ganti `DB_CONNECTION=pgsql`, `DB_PORT=5432`, `DB_USERNAME=postgres` di `.env`.
 
 ---
 
@@ -73,22 +56,141 @@ DB_PASSWORD=<password-postgres-kamu>
 
 | Modul | Status | Keterangan |
 |---|---|---|
-| Pasien (CRUD) | ✅ Tersedia | List, Tambah, Edit, Hapus |
-| Dokter | ✅ Data tersedia | Hanya data seed (5 dokter), belum ada halaman UI |
+| Pasien (CRUD) | ✅ Tersedia | List, Tambah, Edit, Hapus — dengan **1 bug yang sengaja ditanam** |
+| Dokter | ✅ Data tersedia | 5 dokter ter-seed, belum ada halaman UI |
+| Kunjungan | ❌ Belum ada | **Tugasmu membuat ini** |
 
 ---
 
-## Cara Kerja di Sesi Tes
+## Tugas
 
-1. **Fork atau clone** repo ini ke akun GitHub-mu sendiri.
-2. Kerjakan semua tugas di branch `kandidat`:
-   ```bash
-   git checkout -b kandidat
-   ```
-3. Commit perubahanmu secara bertahap (bukan satu commit besar di akhir).
-4. Push ke repo-mu dan bagikan URL repo kepada penguji setelah waktu habis.
+Kerjakan semua tugas di branch `kandidat`. Commit secara **bertahap** (minimal 4 commit terpisah — bukan satu commit besar di akhir).
 
-> **Catatan:** Tugas lengkap akan dijelaskan oleh penguji saat sesi berlangsung. Jangan mulai mengerjakan apa pun sebelum penguji memulai sesi.
+---
+
+### Tugas 1 — Debugging
+
+Ada **satu bug** pada modul Pasien yang sudah ada. Temukan dan perbaiki.
+
+**Cara menemukan:** coba edit data pasien tanpa mengubah No. Rekam Medis, lalu simpan. Perhatikan apa yang terjadi.
+
+Perbaiki bug tersebut dan pastikan edit pasien berjalan normal.
+
+---
+
+### Tugas 2 — Modul Kunjungan (Migration + Model + Relasi)
+
+Buat tabel `kunjungan` dengan kolom:
+
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `id` | bigint, PK | |
+| `pasien_id` | bigint, FK | → tabel `pasien` |
+| `dokter_id` | bigint, FK | → tabel `dokter` |
+| `tgl_kunjungan` | date | |
+| `keluhan` | text | nullable |
+| `catatan_dokter` | text | nullable |
+| timestamps | | |
+
+Buat juga:
+- Model `Kunjungan` dengan `$fillable` dan relasi `belongsTo` ke `Pasien` dan `Dokter`
+- Relasi `hasMany('kunjungan')` di model `Pasien`
+
+---
+
+### Tugas 3 — CRUD Kunjungan
+
+Buat halaman dan controller untuk Kunjungan:
+
+- **Index** — daftar kunjungan (tampilkan: tanggal, nama pasien, nama dokter, keluhan singkat). **Wajib gunakan eager loading** agar tidak terjadi query N+1.
+- **Create + Store** — form tambah kunjungan baru dengan validasi:
+  - `pasien_id` → required, harus ada di tabel pasien
+  - `dokter_id` → required, harus ada di tabel dokter
+  - `tgl_kunjungan` → required, format tanggal valid
+  - `keluhan` → nullable
+- **Tampilkan pesan sukses/gagal** setelah aksi
+
+Route yang diharapkan:
+```
+GET  /kunjungan          → index
+GET  /kunjungan/create   → form tambah
+POST /kunjungan          → simpan
+```
+
+---
+
+### Tugas 4 — REST API
+
+Buat endpoint di `routes/api.php`:
+
+```
+GET /api/pasien/{id}/kunjungan
+```
+
+**Response sukses (200):**
+```json
+{
+  "data": {
+    "pasien": {
+      "id": 1,
+      "no_rm": "RM0001",
+      "nama": "Agus Setiawan"
+    },
+    "kunjungan": [
+      {
+        "id": 1,
+        "tgl_kunjungan": "2024-06-15",
+        "keluhan": "Demam dan batuk",
+        "dokter": "dr. Budi Santoso"
+      }
+    ],
+    "total": 1
+  }
+}
+```
+
+**Response pasien tidak ditemukan (404):**
+```json
+{
+  "message": "Pasien tidak ditemukan."
+}
+```
+
+---
+
+### Tugas 5 — Fitur Interaktif dengan Livewire
+
+Livewire sudah terpasang di project ini.
+
+Buat **satu** fitur interaktif menggunakan Livewire, pilih salah satu:
+
+- **Opsi A:** Search/filter pasien secara real-time di halaman index pasien (tanpa reload halaman)
+- **Opsi B:** Tabel kunjungan yang bisa difilter berdasarkan nama dokter atau rentang tanggal
+
+Komponen harus menampilkan data dengan **paginasi** (jangan load semua data sekaligus).
+
+---
+
+### Tugas 6 — Query SQL
+
+Tuliskan **2 query SQL mentah** (boleh di file `queries.sql`, di `README`, atau dijalankan via `php artisan tinker` dengan `DB::select()`).
+
+**Query 1:** Tampilkan daftar pasien beserta jumlah kunjungannya, hanya pasien yang memiliki **lebih dari 1 kunjungan**, diurutkan dari yang terbanyak.
+
+**Query 2:** Tampilkan nama dokter dan jumlah kunjungan yang ditanganinya **pada bulan berjalan**, diurutkan dari terbanyak.
+
+---
+
+## Ketentuan Pengumpulan
+
+1. Pastikan semua pekerjaan ada di branch **`kandidat`**
+2. Push ke fork GitHub-mu
+3. Kirimkan **URL repo GitHub-mu** kepada penguji sebelum waktu habis
+4. Pastikan repo **Public** agar penguji bisa mengakses
+
+```bash
+git push origin kandidat
+```
 
 ---
 
@@ -97,32 +199,31 @@ DB_PASSWORD=<password-postgres-kamu>
 ```
 app/
   Http/Controllers/
-    PasienController.php   ← Controller CRUD Pasien
+    PasienController.php     ← CRUD Pasien (ada bug di method update)
   Models/
     Pasien.php
     Dokter.php
 database/
-  migrations/             ← Skema tabel pasien & dokter
+  migrations/
   seeders/
-    DokterSeeder.php      ← 5 data dokter
-    PasienSeeder.php      ← 20 data pasien
+    DokterSeeder.php         ← 5 dokter
+    PasienSeeder.php         ← 20 pasien (RM0001–RM0020)
 resources/views/
-  layouts/app.blade.php   ← Layout utama (Bootstrap 5)
+  layouts/app.blade.php      ← Layout Bootstrap 5 + Livewire
   pasien/
-    index.blade.php
-    create.blade.php
-    edit.blade.php
 routes/
-  web.php                 ← Route resource pasien
+  web.php                    ← Route resource pasien
+  api.php                    ← Kosong, siap diisi (prefix: /api)
 ```
 
 ---
 
 ## Tips
 
-- Gunakan `php artisan migrate:fresh --seed` untuk reset database ke kondisi awal.
-- Gunakan `php artisan route:list` untuk melihat semua route yang terdaftar.
-- Semua library PHP dikelola lewat Composer; semua library CSS/JS menggunakan CDN (tidak ada build step).
+- `php artisan migrate:fresh --seed` — reset database ke kondisi awal
+- `php artisan route:list` — lihat semua route terdaftar
+- `php artisan make:livewire NamaKomponen` — buat komponen Livewire baru
+- Tidak ada build step (Vite/npm) — semua CSS/JS via CDN
 
 ---
 
