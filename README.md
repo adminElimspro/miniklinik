@@ -12,7 +12,7 @@ Bacalah README ini secara menyeluruh sebelum mulai mengerjakan.
 |---|---|
 | PHP | 8.2 |
 | Composer | 2.x |
-| MySQL | 8.x (atau PostgreSQL 15+) |
+| PostgreSQL | 15+ |
 
 ---
 
@@ -33,11 +33,11 @@ composer install
 cp .env.example .env
 php artisan key:generate
 
-# 5. Buat database MySQL bernama: miniklinik
+# 5. Buat database PostgreSQL bernama: miniklinik
 #    Lalu isi .env:
 #    DB_DATABASE=miniklinik
-#    DB_USERNAME=root
-#    DB_PASSWORD=<password-mysql-kamu>
+#    DB_USERNAME=postgres
+#    DB_PASSWORD=<password-postgres-kamu>
 
 # 6. Migrasi & seed
 php artisan migrate --seed
@@ -47,8 +47,6 @@ php artisan serve
 ```
 
 Buka **http://localhost:8000** — kamu akan melihat daftar 20 pasien.
-
-> **PostgreSQL?** Ganti `DB_CONNECTION=pgsql`, `DB_PORT=5432`, `DB_USERNAME=postgres` di `.env`.
 
 ---
 
