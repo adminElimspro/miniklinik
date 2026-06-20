@@ -184,13 +184,31 @@ Tuliskan **2 query SQL mentah** (boleh di file `queries.sql`, di `README`, atau 
 ## Ketentuan Pengumpulan
 
 1. Pastikan semua pekerjaan ada di branch **`kandidat`**
-2. Push ke fork GitHub-mu
-3. Kirimkan **URL repo GitHub-mu** kepada penguji sebelum waktu habis
-4. Pastikan repo **Public** agar penguji bisa mengakses
+2. Simpan screenshot bukti pengerjaan di folder **`screenshots/`** (lihat daftar di bawah)
+3. Push ke fork GitHub-mu
+4. Kirimkan **URL repo GitHub-mu** kepada penguji sebelum waktu habis
+5. Pastikan repo **Public** agar penguji bisa mengakses
 
 ```bash
 git push origin kandidat
 ```
+
+### Screenshot Wajib (taruh di folder `screenshots/`)
+
+Buat folder `screenshots/` di root project, lalu simpan file-file berikut:
+
+| Nama File | Isi Screenshot |
+|---|---|
+| `01-pasien-edit-ok.png` | Halaman edit pasien berhasil disimpan (bug sudah diperbaiki) |
+| `02-kunjungan-index.png` | Halaman daftar kunjungan dengan minimal 3 data |
+| `03-kunjungan-create.png` | Form tambah kunjungan (kosong atau terisi) |
+| `04-api-200.png` | Response `GET /api/pasien/{id}/kunjungan` di Postman / browser (status 200, body JSON) |
+| `05-api-404.png` | Response dengan id pasien yang tidak ada (status 404) |
+| `06-livewire.png` | Fitur Livewire berjalan — tampilkan hasil search/filter |
+| `07-sql-query1.png` | Hasil query SQL No. 1 (bisa dari MySQL Workbench, DBeaver, atau `tinker`) |
+| `08-sql-query2.png` | Hasil query SQL No. 2 |
+
+> Screenshot tidak harus sempurna — yang penting menunjukkan fitur berjalan. Format PNG atau JPG, nama file bebas asalkan mudah diidentifikasi.
 
 ---
 
